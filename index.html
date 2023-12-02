@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fingerprint Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3"></script>
+</head>
+<body>
+  <h1>Fingerprint Login</h1>
+  <form id="loginForm">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="button" id="loginBtn">Login with Fingerprint</button>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginForm = document.getElementById('loginForm');
+      const loginBtn = document.getElementById('loginBtn');
+
+      loginBtn.addEventListener('click', async () => {
+        try {
+          // Use FingerprintJS to get the user's fingerprint
+          const fp = await FingerprintJS.load();
+          const result = await fp.get();
+
+          // Send the fingerprint and other login data to the server for verification
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+
+          const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, fingerprint: result.visitorId }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert('Login successful!');
+          } else {
+            alert('Login failed. Please try again.');
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
